@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+set -a
+
+ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd ../../ && pwd )"
+
+FPS=60
+RESX=4096
+RESY=2048
+
+PIPELINE="${ROOT}/_pipeline"
+HOUDINI_PATH="&:${PIPELINE}/houdini"
+JOB=$ROOT
+HOUDINI_BACKUP_FILENAME="\$BASENAME_bak_\$N"
+HOUDINI_BACKUP_DIR="bak"
+HOUDINI_MAX_BACKUP_FILES=10
+HOUDINI_NO_START_PAGE_SPLASH=1
+HOUDINI_ANONYMOUS_STATISTICS=0
+HOUDINI_BUFFEREDSAVE=1
+HOUDINI_IMAGE_DISPLAY_GAMMA=1
+HOUDINI_IMAGE_DISPLAY_LUT="${PIPELINE}/houdini/linear-to-srgb_14bit.lut"
+HOUDINI_IMAGE_DISPLAY_OVERRIDE=1
+HOUDINI_SPLASH_FILE=${PIPELINE}/houdini/splash.png
+HOUDINI_DSO_ERROR=2
+REDSHIFT_LICENSEPATH="${PIPELINE}/redshift-lic/redshift.lic"
+#REDSHIFT_PATHOVERRIDE_FILE="${PIPELINE}/houdini/rs_paths_remap"
+REDSHIFT_PATHOVERRIDE_STRING="\"//isilonai/strandsofmind\" \"${ROOT}\" \"S:\" \"${ROOT}\""
+HOUDINI_PATHMAP="{ \"//isilonai/strandsofmind\": \"${ROOT}\", \"S:\": \"${ROOT}\" }"
+
+MEGA_LIB="${ROOT}/010_Material/020_3D/010_Assets/090_Libraries/010_SOM_Megascans_N/Downloaded"
+MSL=$MEGA_LIB
+HOUDINI_PATH="${HOUDINI_PATH}:${PIPELINE}/megaH/houdini"

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mainMenu>
+	<addScriptItem id="h.royalrender">
+		<parent>render_menu</parent>
+		<insertAfter/>
+		<label>Submit RRender</label>
+		<scriptPath>$PIPELINE/houdini/scripts/rrSubmit_Houdini_12.5+.py</scriptPath>
+	</addScriptItem>
+</mainMenu>

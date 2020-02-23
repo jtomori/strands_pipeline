@@ -1,0 +1,16 @@
+$HIP/030_Production/010_Shots/010_FN_MAIN/000_RND/010_HOU/010_Forest_Environtment/WORK/
+$JOB/030_Production/010_Shots/
+$JOB/030_Production/010_Shots/010_FN_MAIN/000_RND/010_HOU/
+$JOB/030_Production/010_Shots/010_FN_MAIN/000_RND/010_HOU/010_Forest_Environtment/
+$JOB/030_Production/010_Shots/010_FN_MAIN/000_RND/010_HOU/020_Scatter_Tool/WORK/
+$JOB/030_Production/010_Shots/010_FN_MAIN/000_RND/010_HOU/030_Master_Shader/WORK/
+$JOB/030_Production/010_Shots/010_FN_MAIN/000_RND/010_HOU/035_Master_Shader_Trees/WORK/
+$JOB/030_Production/010_Shots/030_HT_MAIN/000_RND/010_HOU/010_Previs/WORK/
+$JOB/030_Production/010_Shots/050_BT_MAIN/020_3D/010_HOU/WORK/
+$MEGA_LIB/3d/
+$PIPELINE/houdini/
+$ROOT/
+$ROOT/010_Material/020_3D/010_Assets/
+$ROOT/020_Preproduction/050_RND/
+$ROOT/030_Production/
+$ROOT/090_User/$USER/

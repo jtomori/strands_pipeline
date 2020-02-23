@@ -1,0 +1,1995 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<shelfDocument>
+  <!-- This file contains definitions of shelves, toolbars, and tools.
+ It should not be hand-edited when it is being used by the application.
+ Note, that two definitions of the same element are not allowed in
+ a single file. -->
+
+  <toolshelf name="strandsofmind" label="SOM">
+    <memberTool name="reload"/>
+    <memberTool name="convert_all_textures"/>
+    <memberTool name="check_all_paths"/>
+  </toolshelf>
+
+  <tool name="generate_bat" label="Run on Blades" icon="ROP_dop">
+    <script scriptType="python"><![CDATA[import strands_hou
+
+strands_hou.SceneUtils.generateBat()]]></script>
+  </tool>
+
+  <tool name="submit_vca" label="Run on VCA" icon="SHELF_factory">
+    <script scriptType="python"><![CDATA[import strands_hou
+
+strands_hou.VCAUtils.submitToVCA()]]></script>
+  </tool>
+
+  <tool name="save_inc" label="Save Inc" icon="SOP_filecache">
+    <script scriptType="python"><![CDATA[import strands_hou
+strands_hou.SceneUtils.incSaveFile()]]></script>
+  </tool>
+
+  <tool name="extract_object" label="Extract Object" icon="SOP_object_merge">
+    <script scriptType="python"><![CDATA[nodes = hou.selectedNodes(0);
+
+#init counter
+i = -1
+
+for node in nodes:
+    
+    # counter
+    i += 1
+
+    try:
+        geo_name = node.name().split("OUT_")[1]
+    except:
+        geo_name = node.name()
+    
+    om_name = "om_"+geo_name
+    om_path = node.path()
+
+    geo_node = hou.node("/obj").createNode("geo", geo_name)
+    
+    #set position of geo node
+    pos = node.parent().position()
+    pos[1] -= 1.5
+    pos[0] += i*2.5
+    geo_node.setPosition(pos)
+    
+    
+    filenode = geo_node.node("file1")
+    filenode.destroy()
+    
+    om_node = geo_node.createNode("object_merge", om_name)    
+    
+    om_node.parm("objpath1").set(om_path)
+    om_node.parm("xformtype").set(1)
+    
+    out_name = "OUT_"+geo_name
+    out_node = geo_node.createNode("null", out_name)
+    out_node.setColor(hou.Color((0,0,0)))
+    
+    out_node.setInput(0, om_node, 0)
+    out_node.setDisplayFlag(1)
+    out_node.setRenderFlag(1)
+    
+    geo_node.layoutChildren()
+    out_node.move((0,-10))
+    
+    ]]></script>
+  </tool>
+
+  <tool name="reload" label="Reload" icon="PLASMA_App">
+    <helpText><![CDATA[""" Reloads Strands of Mind Houdini library - strands_hou """]]></helpText>
+    <script scriptType="python"><![CDATA[import strands_hou
+reload(strands_hou)]]></script>
+  </tool>
+
+  <tool name="create_som_rs_rop" label="Create SOM RS Rop" icon="ROP_Redshift_ROP">
+    <script scriptType="python"><![CDATA[
+#######################
+# Create RS ROP
+
+
+# Initialize parent node variable.
+hou_parent = hou.node("/out")
+
+# Code for /out/rs_rop_som
+hou_node = hou_parent.createNode("Redshift_ROP", "rs_rop_som", run_init_scripts=False, load_contents=True, exact_type_name=True)
+rs_rop_node = hou_node
+
+## set position
+
+try:
+    sel_node = hou.selectedNodes()[-1]
+    sel_node_pos = sel_node.position()
+    sel_node_pos[1] -= 3
+        
+    rs_rop_node.setPosition(sel_node_pos)
+except:
+    print "No Node Selected, RS ROP placed at Origin."
+
+
+
+rs_rop_pos = rs_rop_node.position()
+
+
+
+
+hou_node.bypass(False)
+hou_node.hide(False)
+hou_node.setLocked(False)
+hou_node.setSelected(True)
+
+
+
+######
+
+#set skip frames
+
+hou_parm = hou_node.parm("RS_outputSkipRendered")
+hou_parm.set(1)
+
+hou_parm = hou_node.parm("RS_archive_enable")
+hou_parm.set(1)
+
+hou_parm = hou_node.parm("RS_archive_skipFiles")
+hou_parm.set(1)
+
+
+######
+
+
+
+# Code for /out/rs_rop_som/f parm tuple
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm_tuple = hou_node.parmTuple("f")
+hou_parm_tuple.set((1, 480, 2))
+
+# Code for first keyframe.
+# Code for keyframe.
+hou_keyframe = hou.Keyframe()
+hou_keyframe.setTime(0)
+hou_keyframe.setExpression("$RFSTART", hou.exprLanguage.Hscript)
+hou_parm_tuple[0].setKeyframe(hou_keyframe)
+
+# Code for last keyframe.
+# Code for keyframe.
+hou_keyframe = hou.Keyframe()
+hou_keyframe.setTime(0)
+hou_keyframe.setExpression("$RFSTART", hou.exprLanguage.Hscript)
+hou_parm_tuple[0].setKeyframe(hou_keyframe)
+
+# Code for keyframe.
+hou_keyframe = hou.Keyframe()
+hou_keyframe.setTime(0)
+hou_keyframe.setExpression("$RFSTART", hou.exprLanguage.Hscript)
+hou_parm_tuple[0].setKeyframe(hou_keyframe)
+
+# Code for first keyframe.
+# Code for keyframe.
+hou_keyframe = hou.Keyframe()
+hou_keyframe.setTime(0)
+hou_keyframe.setExpression("$RFEND", hou.exprLanguage.Hscript)
+hou_parm_tuple[1].setKeyframe(hou_keyframe)
+
+# Code for last keyframe.
+# Code for keyframe.
+hou_keyframe = hou.Keyframe()
+hou_keyframe.setTime(0)
+hou_keyframe.setExpression("$RFEND", hou.exprLanguage.Hscript)
+hou_parm_tuple[1].setKeyframe(hou_keyframe)
+
+# Code for keyframe.
+hou_keyframe = hou.Keyframe()
+hou_keyframe.setTime(0)
+hou_keyframe.setExpression("$RFEND", hou.exprLanguage.Hscript)
+hou_parm_tuple[1].setKeyframe(hou_keyframe)
+
+
+# Code for /out/rs_rop_som/RS_renderCamera parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_renderCamera")
+hou_parm.set("")
+
+
+# Code for /out/rs_rop_som/RS_overrideResScale parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_overrideResScale")
+hou_parm.set("5")
+
+
+# Code for /out/rs_rop_som/RS_overrideRes parm tuple
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm_tuple = hou_node.parmTuple("RS_overrideRes")
+hou_parm_tuple.set((1024, 1024))
+
+
+# Code for /out/rs_rop_som/RS_nonBlockingRendering parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_nonBlockingRendering")
+hou_parm.set(0)
+
+
+# Code for /out/rs_rop_som/RS_renderToMPlay parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_renderToMPlay")
+hou_parm.set(0)
+
+
+# Code for /out/rs_rop_som/RS_outputFileNamePrefix parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_outputFileNamePrefix")
+hou_parm.set("$HIP/../OUT/render_rs/$HIPNAME/$OS/$HIPNAME.$OS.$F4.exr")
+
+
+# Code for /out/rs_rop_som/RS_outputMultilayerMode parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_outputMultilayerMode")
+hou_parm.set("2")
+
+
+# Code for /out/rs_rop_som/RS_aovMultilayerBeauty parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovMultilayerBeauty")
+hou_parm.set(0)
+
+
+# Code for /out/rs_rop_som/RS_aovAutocrop parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovAutocrop")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovGUIHideOptions parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovGUIHideOptions")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovGUIExpandTabs parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovGUIExpandTabs")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aov parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aov")
+hou_parm.set(14)
+
+
+# Code for /out/rs_rop_som/RS_gammaPreview parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_gammaPreview")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_gammaFileMode parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_gammaFileMode")
+hou_parm.set("noGamma")
+
+
+# Code for /out/rs_rop_som/RS_gammaSamplingMode parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_gammaSamplingMode")
+hou_parm.set("customGamma")
+
+
+# Code for /out/rs_rop_som/UnifiedMaxSamples parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("UnifiedMaxSamples")
+hou_parm.set(64)
+
+
+# Code for /out/rs_rop_som/NumGIBounces parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("NumGIBounces")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/BruteForceGINumRays parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("BruteForceGINumRays")
+hou_parm.set(128)
+
+
+# Code for /out/rs_rop_som/AbortOnLicenseFail parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("AbortOnLicenseFail")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_archive_file parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_archive_file")
+hou_parm.set("$HIP/../OUT/render_rs_archive/$HIPNAME/$OS/$HIPNAME.$OS.$F4.rs")
+
+
+# Code for /out/rs_rop_som/RS_objects_candidate parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_objects_candidate")
+hou_parm.set("")
+
+
+# Code for /out/rs_rop_som/RS_objects_force parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_objects_force")
+hou_parm.set("rs_*")
+
+
+# Code for /out/rs_rop_som/RS_lights_candidate parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_lights_candidate")
+hou_parm.set("")
+
+
+# Code for /out/rs_rop_som/RS_lights_force parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_lights_force")
+hou_parm.set("rs_*")
+
+
+# Code for /out/rs_rop_som/lprerender parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("lprerender")
+hou_parm.set("python")
+
+
+# Code for /out/rs_rop_som/lpreframe parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("lpreframe")
+hou_parm.set("python")
+
+
+# Code for /out/rs_rop_som/lpostframe parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("lpostframe")
+hou_parm.set("python")
+
+
+# Code for /out/rs_rop_som/lpostrender parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("lpostrender")
+hou_parm.set("python")
+
+
+# Code for /out/rs_rop_som/RS_iprOverrideRes parm tuple
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm_tuple = hou_node.parmTuple("RS_iprOverrideRes")
+hou_parm_tuple.set((1024, 1024))
+
+
+# Code for /out/rs_rop_som/RS_iprProgressive parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_iprProgressive")
+hou_parm.set(0)
+
+
+# Code for /out/rs_rop_som/RS_iprUpdateMeshDeform parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_iprUpdateMeshDeform")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovCommonSwitcher_1 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCommonSwitcher_1")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovCustomPrefix_1 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+
+# Code for /out/rs_rop_som/RS_aovWorldSwitcher_1 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovWorldSwitcher_1")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovDeepSwitcher_1 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovDeepSwitcher_1")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovMotionSwitcher_1 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovMotionSwitcher_1")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovPuzzleSwitcher_1 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovPuzzleSwitcher_1")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovObjectSwitcher_1 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovObjectSwitcher_1")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovMaterialSwitcher_1 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovMaterialSwitcher_1")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovCustomSwitcher_1 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCustomSwitcher_1")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovLightSwitcher_1 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovLightSwitcher_1")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovID_2 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovID_2")
+hou_parm.set("DIRECTLIGHTING_REFLECTIONS")
+
+
+# Code for /out/rs_rop_som/RS_aovSuffix_2 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovSuffix_2")
+hou_parm.set("specular")
+
+
+# Code for /out/rs_rop_som/RS_aovCommonSwitcher_2 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCommonSwitcher_2")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovCustomPrefix_2 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+
+# Code for /out/rs_rop_som/RS_aovWorldSwitcher_2 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovWorldSwitcher_2")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovDeepSwitcher_2 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovDeepSwitcher_2")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovMotionSwitcher_2 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovMotionSwitcher_2")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovPuzzleSwitcher_2 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovPuzzleSwitcher_2")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovObjectSwitcher_2 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovObjectSwitcher_2")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovMaterialSwitcher_2 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovMaterialSwitcher_2")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovCustomSwitcher_2 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCustomSwitcher_2")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovLightSwitcher_2 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovLightSwitcher_2")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovID_3 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovID_3")
+hou_parm.set("INDIRECTLIGHTING_REFLECTIONS")
+
+
+# Code for /out/rs_rop_som/RS_aovSuffix_3 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovSuffix_3")
+hou_parm.set("reflection")
+
+
+# Code for /out/rs_rop_som/RS_aovCommonSwitcher_3 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCommonSwitcher_3")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovCustomPrefix_3 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+
+# Code for /out/rs_rop_som/RS_aovWorldSwitcher_3 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovWorldSwitcher_3")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovDeepSwitcher_3 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovDeepSwitcher_3")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovMotionSwitcher_3 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovMotionSwitcher_3")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovPuzzleSwitcher_3 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovPuzzleSwitcher_3")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovObjectSwitcher_3 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovObjectSwitcher_3")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovMaterialSwitcher_3 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovMaterialSwitcher_3")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovCustomSwitcher_3 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCustomSwitcher_3")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovLightSwitcher_3 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovLightSwitcher_3")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovID_4 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovID_4")
+hou_parm.set("INDIRECTLIGHTING_REFRACTIONS")
+
+
+# Code for /out/rs_rop_som/RS_aovSuffix_4 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovSuffix_4")
+hou_parm.set("refraction")
+
+
+# Code for /out/rs_rop_som/RS_aovCommonSwitcher_4 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCommonSwitcher_4")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovCustomPrefix_4 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCustomPrefix_4")
+
+
+# Code for /out/rs_rop_som/RS_aovWorldSwitcher_4 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovWorldSwitcher_4")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovDeepSwitcher_4 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovDeepSwitcher_4")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovMotionSwitcher_4 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovMotionSwitcher_4")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovPuzzleSwitcher_4 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovPuzzleSwitcher_4")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovObjectSwitcher_4 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovObjectSwitcher_4")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovMaterialSwitcher_4 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovMaterialSwitcher_4")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovCustomSwitcher_4 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCustomSwitcher_4")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovLightSwitcher_4 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovLightSwitcher_4")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovID_5 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovID_5")
+hou_parm.set("SSS")
+
+
+# Code for /out/rs_rop_som/RS_aovSuffix_5 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovSuffix_5")
+hou_parm.set("sss")
+
+
+# Code for /out/rs_rop_som/RS_aovCommonSwitcher_5 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCommonSwitcher_5")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovCustomPrefix_5 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCustomPrefix_5")
+
+
+# Code for /out/rs_rop_som/RS_aovWorldSwitcher_5 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovWorldSwitcher_5")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovDeepSwitcher_5 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovDeepSwitcher_5")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovMotionSwitcher_5 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovMotionSwitcher_5")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovPuzzleSwitcher_5 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovPuzzleSwitcher_5")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovObjectSwitcher_5 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovObjectSwitcher_5")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovMaterialSwitcher_5 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovMaterialSwitcher_5")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovCustomSwitcher_5 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCustomSwitcher_5")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovLightSwitcher_5 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovLightSwitcher_5")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovID_6 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovID_6")
+hou_parm.set("GI")
+
+
+# Code for /out/rs_rop_som/RS_aovSuffix_6 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovSuffix_6")
+hou_parm.set("gi")
+
+
+# Code for /out/rs_rop_som/RS_aovCommonSwitcher_6 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCommonSwitcher_6")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovCustomPrefix_6 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCustomPrefix_6")
+
+
+# Code for /out/rs_rop_som/RS_aovWorldSwitcher_6 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovWorldSwitcher_6")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovDeepSwitcher_6 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovDeepSwitcher_6")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovMotionSwitcher_6 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovMotionSwitcher_6")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovPuzzleSwitcher_6 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovPuzzleSwitcher_6")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovObjectSwitcher_6 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovObjectSwitcher_6")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovMaterialSwitcher_6 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovMaterialSwitcher_6")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovCustomSwitcher_6 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCustomSwitcher_6")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovLightSwitcher_6 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovLightSwitcher_6")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovLightGroups_6 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovLightGroups_6")
+hou_parm.set("0")
+
+
+# Code for /out/rs_rop_som/RS_aovID_7 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovID_7")
+hou_parm.set("EMISSION")
+
+
+# Code for /out/rs_rop_som/RS_aovSuffix_7 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovSuffix_7")
+hou_parm.set("emission")
+
+
+# Code for /out/rs_rop_som/RS_aovCommonSwitcher_7 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCommonSwitcher_7")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovCustomPrefix_7 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCustomPrefix_7")
+
+
+# Code for /out/rs_rop_som/RS_aovWorldSwitcher_7 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovWorldSwitcher_7")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovDeepSwitcher_7 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovDeepSwitcher_7")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovMotionSwitcher_7 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovMotionSwitcher_7")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovPuzzleSwitcher_7 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovPuzzleSwitcher_7")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovObjectSwitcher_7 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovObjectSwitcher_7")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovMaterialSwitcher_7 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovMaterialSwitcher_7")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovCustomSwitcher_7 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCustomSwitcher_7")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovLightSwitcher_7 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovLightSwitcher_7")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovID_8 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovID_8")
+hou_parm.set("AO_RAW")
+
+
+# Code for /out/rs_rop_som/RS_aovSuffix_8 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovSuffix_8")
+hou_parm.set("ao")
+
+
+# Code for /out/rs_rop_som/RS_aovCommonSwitcher_8 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCommonSwitcher_8")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovCustomPrefix_8 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCustomPrefix_8")
+
+
+# Code for /out/rs_rop_som/RS_aovWorldSwitcher_8 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovWorldSwitcher_8")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovDeepSwitcher_8 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovDeepSwitcher_8")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovMotionSwitcher_8 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovMotionSwitcher_8")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovPuzzleSwitcher_8 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovPuzzleSwitcher_8")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovObjectSwitcher_8 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovObjectSwitcher_8")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovMaterialSwitcher_8 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovMaterialSwitcher_8")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovCustomSwitcher_8 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCustomSwitcher_8")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovLightSwitcher_8 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovLightSwitcher_8")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovID_9 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovID_9")
+hou_parm.set("SHADOWS")
+
+
+# Code for /out/rs_rop_som/RS_aovSuffix_9 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovSuffix_9")
+hou_parm.set("shadows")
+
+
+# Code for /out/rs_rop_som/RS_aovEnable_9 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovEnable_9")
+hou_parm.set(0)
+
+
+# Code for /out/rs_rop_som/RS_aovCommonSwitcher_9 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCommonSwitcher_9")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovCustomPrefix_9 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCustomPrefix_9")
+
+
+# Code for /out/rs_rop_som/RS_aovMaterialSwitcher_9 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovMaterialSwitcher_9")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovID_10 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovID_10")
+hou_parm.set("VOLUMELIGHTING")
+
+
+# Code for /out/rs_rop_som/RS_aovSuffix_10 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovSuffix_10")
+hou_parm.set("volume")
+
+
+# Code for /out/rs_rop_som/RS_aovEnable_10 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovEnable_10")
+hou_parm.set(0)
+
+
+# Code for /out/rs_rop_som/RS_aovCommonSwitcher_10 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCommonSwitcher_10")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovCustomPrefix_10 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCustomPrefix_10")
+
+
+# Code for /out/rs_rop_som/RS_aovWorldSwitcher_10 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovWorldSwitcher_10")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovDeepSwitcher_10 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovDeepSwitcher_10")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovMotionSwitcher_10 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovMotionSwitcher_10")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovPuzzleSwitcher_10 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovPuzzleSwitcher_10")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovObjectSwitcher_10 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovObjectSwitcher_10")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovMaterialSwitcher_10 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovMaterialSwitcher_10")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovCustomSwitcher_10 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCustomSwitcher_10")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovLightSwitcher_10 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovLightSwitcher_10")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovID_11 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovID_11")
+hou_parm.set("World")
+
+
+# Code for /out/rs_rop_som/RS_aovSuffix_11 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovSuffix_11")
+hou_parm.set("P")
+
+
+# Code for /out/rs_rop_som/RS_aovEnable_11 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovEnable_11")
+hou_parm.set(0)
+
+
+# Code for /out/rs_rop_som/RS_aovCommonSwitcher_11 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCommonSwitcher_11")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovCustomPrefix_11 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCustomPrefix_11")
+
+
+# Code for /out/rs_rop_som/RS_aovBits_11 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovBits_11")
+hou_parm.set("FLOAT32")
+
+
+# Code for /out/rs_rop_som/RS_aovWorldSwitcher_11 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovWorldSwitcher_11")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovDeepSwitcher_11 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovDeepSwitcher_11")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovMotionSwitcher_11 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovMotionSwitcher_11")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovPuzzleSwitcher_11 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovPuzzleSwitcher_11")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovObjectSwitcher_11 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovObjectSwitcher_11")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovMaterialSwitcher_11 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovMaterialSwitcher_11")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovCustomSwitcher_11 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCustomSwitcher_11")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovLightSwitcher_11 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovLightSwitcher_11")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovID_12 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovID_12")
+hou_parm.set("Depth")
+
+
+# Code for /out/rs_rop_som/RS_aovSuffix_12 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovSuffix_12")
+hou_parm.set("Z")
+
+
+# Code for /out/rs_rop_som/RS_aovEnable_12 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovEnable_12")
+hou_parm.set(0)
+
+
+# Code for /out/rs_rop_som/RS_aovCommonSwitcher_12 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCommonSwitcher_12")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovCustomPrefix_12 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCustomPrefix_12")
+
+
+# Code for /out/rs_rop_som/RS_aovBits_12 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovBits_12")
+hou_parm.set("FLOAT32")
+
+
+# Code for /out/rs_rop_som/RS_aovWorldSwitcher_12 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovWorldSwitcher_12")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovDeepSwitcher_12 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovDeepSwitcher_12")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovDeepMode_12 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovDeepMode_12")
+hou_parm.set("ZNORMALIZED")
+
+
+# Code for /out/rs_rop_som/RS_aovMotionSwitcher_12 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovMotionSwitcher_12")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovPuzzleSwitcher_12 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovPuzzleSwitcher_12")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovObjectSwitcher_12 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovObjectSwitcher_12")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovMaterialSwitcher_12 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovMaterialSwitcher_12")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovCustomSwitcher_12 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCustomSwitcher_12")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovLightSwitcher_12 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovLightSwitcher_12")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovID_13 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovID_13")
+hou_parm.set("NORMALS")
+
+
+# Code for /out/rs_rop_som/RS_aovSuffix_13 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovSuffix_13")
+hou_parm.set("N")
+
+
+# Code for /out/rs_rop_som/RS_aovEnable_13 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovEnable_13")
+hou_parm.set(0)
+
+
+# Code for /out/rs_rop_som/RS_aovCommonSwitcher_13 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCommonSwitcher_13")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovCustomPrefix_13 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCustomPrefix_13")
+
+
+# Code for /out/rs_rop_som/RS_aovWorldSwitcher_13 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovWorldSwitcher_13")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovDeepSwitcher_13 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovDeepSwitcher_13")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovMotionSwitcher_13 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovMotionSwitcher_13")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovPuzzleSwitcher_13 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovPuzzleSwitcher_13")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovObjectSwitcher_13 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovObjectSwitcher_13")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovMaterialSwitcher_13 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovMaterialSwitcher_13")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovCustomSwitcher_13 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCustomSwitcher_13")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovLightSwitcher_13 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovLightSwitcher_13")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovID_14 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovID_14")
+hou_parm.set("CUSTOM")
+
+
+# Code for /out/rs_rop_som/RS_aovSuffix_14 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovSuffix_14")
+hou_parm.set("custom")
+
+
+# Code for /out/rs_rop_som/RS_aovEnable_14 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovEnable_14")
+hou_parm.set(0)
+
+
+# Code for /out/rs_rop_som/RS_aovCommonSwitcher_14 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCommonSwitcher_14")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovCustomPrefix_14 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCustomPrefix_14")
+
+
+# Code for /out/rs_rop_som/RS_aovWorldSwitcher_14 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovWorldSwitcher_14")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovDeepSwitcher_14 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovDeepSwitcher_14")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovMotionSwitcher_14 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovMotionSwitcher_14")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovPuzzleSwitcher_14 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovPuzzleSwitcher_14")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovObjectSwitcher_14 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovObjectSwitcher_14")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovMaterialSwitcher_14 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovMaterialSwitcher_14")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovCustomSwitcher_14 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCustomSwitcher_14")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovCustomCP_14 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovCustomCP_14")
+hou_parm.set(1)
+
+
+# Code for /out/rs_rop_som/RS_aovLightSwitcher_14 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som")
+hou_parm = hou_node.parm("RS_aovLightSwitcher_14")
+hou_parm.set(1)
+
+
+hou_node.setExpressionLanguage(hou.exprLanguage.Hscript)
+
+hou_node.setUserData("___Version___", "16.5.268")
+if hasattr(hou_node, "syncNodeVersionIfNeeded"):
+    hou_node.syncNodeVersionIfNeeded("16.5.268")
+    
+    
+
+
+
+
+
+
+######################################
+# Create RS IPR ROP
+
+# Initialize parent node variable.
+hou_parent = hou.node("/out")
+
+# Code for /out/rs_rop_som_IPR
+hou_node = hou_parent.createNode("Redshift_IPR", "rs_rop_som_IPR", run_init_scripts=False, load_contents=True, exact_type_name=True)
+hou_node.setPosition(rs_rop_pos)
+hou_node.move(hou.Vector2(0, -0.6))
+hou_node.bypass(False)
+hou_node.hide(False)
+hou_node.setLocked(False)
+hou_node.setSelected(True)
+
+# Code for /out/rs_rop_som_IPR/f parm tuple
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som_IPR")
+hou_parm_tuple = hou_node.parmTuple("f")
+
+# Code for first keyframe.
+# Code for keyframe.
+hou_keyframe = hou.Keyframe()
+hou_keyframe.setTime(0)
+hou_keyframe.setExpression("$FSTART", hou.exprLanguage.Hscript)
+hou_parm_tuple[0].setKeyframe(hou_keyframe)
+
+# Code for last keyframe.
+# Code for keyframe.
+hou_keyframe = hou.Keyframe()
+hou_keyframe.setTime(0)
+hou_keyframe.setExpression("$FSTART", hou.exprLanguage.Hscript)
+hou_parm_tuple[0].setKeyframe(hou_keyframe)
+
+# Code for keyframe.
+hou_keyframe = hou.Keyframe()
+hou_keyframe.setTime(0)
+hou_keyframe.setExpression("$FSTART", hou.exprLanguage.Hscript)
+hou_parm_tuple[0].setKeyframe(hou_keyframe)
+
+# Code for first keyframe.
+# Code for keyframe.
+hou_keyframe = hou.Keyframe()
+hou_keyframe.setTime(0)
+hou_keyframe.setExpression("$FEND", hou.exprLanguage.Hscript)
+hou_parm_tuple[1].setKeyframe(hou_keyframe)
+
+# Code for last keyframe.
+# Code for keyframe.
+hou_keyframe = hou.Keyframe()
+hou_keyframe.setTime(0)
+hou_keyframe.setExpression("$FEND", hou.exprLanguage.Hscript)
+hou_parm_tuple[1].setKeyframe(hou_keyframe)
+
+# Code for keyframe.
+hou_keyframe = hou.Keyframe()
+hou_keyframe.setTime(0)
+hou_keyframe.setExpression("$FEND", hou.exprLanguage.Hscript)
+hou_parm_tuple[1].setKeyframe(hou_keyframe)
+
+
+# Code for /out/rs_rop_som_IPR/linked_rop parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/out/rs_rop_som_IPR")
+hou_parm = hou_node.parm("linked_rop")
+hou_parm.set(rs_rop_node.path())
+
+
+hou_node.setExpressionLanguage(hou.exprLanguage.Hscript)
+
+hou_node.setUserData("___Version___", "")
+if hasattr(hou_node, "syncNodeVersionIfNeeded"):
+    hou_node.syncNodeVersionIfNeeded("")
+
+
+
+
+#######################################
+# Custom Settings
+
+
+]]></script>
+    <keywordList>
+      <keyword>create som rs rop</keyword>
+    </keywordList>
+  </tool>
+
+  <tool name="render_rs_with_h265" label="Render RS + H265" icon="RS_openIPR_icon">
+    <script scriptType="python"><![CDATA[post_script = "execfile('S:_pipeline/nuke/src/nuke/SoM_HMDredshift_Houdini.py')"
+
+sel_nodes = hou.selectedNodes()
+
+for node in sel_nodes:
+    if node.type().name() == "Redshift_ROP":
+    
+        # set post script
+        node.parm("tpostrender").set(1)
+        node.parm("postrender").set(post_script)
+        
+        # set other stuff
+        node.parm("RS_outputEnable").set(1)
+        node.parm("RS_renderToMPlay").set(0)
+        
+        # execute render
+        node.parm("execute").pressButton()
+        
+    else:
+        print "No RS ROP Selected!"]]></script>
+  </tool>
+
+  <tool name="rs_preview_node" label="Preview RS Node" icon="VOPNET_surface">
+    <script scriptType="python"><![CDATA[sel_node = hou.selectedNodes()[-1]
+parent_path = sel_node.parent().path()
+
+
+try:
+    # unlock hda
+    hou.node(parent_path).allowEditingOfContents()
+except e:
+    print e
+    
+try:    
+    for ch_node in hou.node(parent_path).children():
+    
+        if "redshift_material" in ch_node.name():
+            rs_output = ch_node
+            
+    rs_output.setInput(0, sel_node)
+
+except e:
+    print e]]></script>
+  </tool>
+
+  <tool name="rs_preview_reset" label="Reset RS Preview" icon="VOPNET_surface">
+    <script scriptType="python"><![CDATA[sel_node = hou.selectedNodes()[-1]
+parent_path = sel_node.parent().path()
+input_node = hou.node(parent_path + "/IN_SURFACE")
+
+
+try:
+    # unlock hda
+    hou.node(parent_path).allowEditingOfContents()
+except e:
+    print e
+    
+try:    
+    for ch_node in hou.node(parent_path).children():
+    
+        if "redshift_material" in ch_node.name():
+            rs_output = ch_node
+            
+    rs_output.setInput(0, input_node)
+
+except e:
+    print e]]></script>
+  </tool>
+
+  <toolshelf name="som_redshift" label="SOM Redshift">
+    <memberTool name="create_som_rs_rop"/>
+    <memberTool name="rs_rop_prev"/>
+    <memberTool name="rs_rop_prev_reset"/>
+    <memberTool name="render_rs_with_h265"/>
+    <memberTool name="rs_preview_node"/>
+    <memberTool name="rs_preview_reset"/>
+    <memberTool name="disable_iridiscence"/>
+    <memberTool name="find_rs_textures"/>
+  </toolshelf>
+
+  <tool name="rs_rop_prev" label="Override RS Rop Prev." icon="RS_openIPR_icon">
+    <script scriptType="python"><![CDATA[sel_nodes = hou.selectedNodes()
+
+
+for node in sel_nodes:
+    out_path = node.parm("RS_outputFileNamePrefix")
+    out_str = out_path.unexpandedString().replace(".exr", ".jpg")
+    out_path.set(out_str)
+    
+
+    out_format = node.parm("RS_outputFileFormat")
+    out_format.set(2)
+    
+
+    out_aov = node.parm("RS_aovAllAOVsDisabled")
+    out_aov.set(1)
+    
+    
+    # camera settings
+    out_cam = out_aov = node.parm("RS_renderCamera")
+    cam = hou.node(out_cam.eval())
+    
+    cam.parm("RS_campro_stereoMode").set(0)
+    
+    # ascpect ratio
+    cam.parm("aspect").set(0.25)
+    
+    
+    # cam ovver settings rop
+    
+    node.parm("RS_overrideCameraRes").set(1)
+    node.parm("RS_overrideResScale").set(7)
+    
+    node.parmTuple("RS_overrideRes").set((8192, 2048))
+    
+    # ipr
+    node.parm("RS_iprOverrideCameraRes").set(1)
+    node.parm("RS_iprOverrideResScale").set(7)
+    
+    node.parmTuple("RS_iprOverrideRes").set((2048, 512))
+    
+    # delete aovs
+    node.parm("RS_aov").set(0)
+    
+    
+    # set gamma
+    node.parm("RS_gammaFileMode").set(1)
+    
+    # set post scripts
+    
+    node.parm("tpostrender").set(0)
+    node.parm("postrender").set("execfile('S:_pipeline/nuke/src/nuke/SoM_HMDredshift_Houdini.py')")
+    ]]></script>
+  </tool>
+
+  <tool name="rs_rop_prev_reset" label="Reset RS Rop Prev." icon="RS_disableIPR_icon">
+    <script scriptType="python"><![CDATA[sel_nodes = hou.selectedNodes()
+
+
+for node in sel_nodes:
+    out_path = node.parm("RS_outputFileNamePrefix")
+    out_str = out_path.unexpandedString().replace(".jpg", ".exr")
+    out_path.set(out_str)
+    
+
+    out_format = node.parm("RS_outputFileFormat")
+    out_format.set(0)
+    
+
+    out_aov = node.parm("RS_aovAllAOVsDisabled")
+    out_aov.set(0)
+    
+    
+    # camera settings
+    out_cam = out_aov = node.parm("RS_renderCamera")
+    cam = hou.node(out_cam.eval())
+    
+    cam.parm("RS_campro_stereoMode").set(1)
+    
+    # ascpect ratio
+    cam.parm("aspect").set(1)
+    
+    
+    # cam ovver settings rop
+    
+    node.parm("RS_overrideCameraRes").set(0)
+    node.parm("RS_overrideResScale").set(7)
+    
+    node.parmTuple("RS_overrideRes").set((1024, 1024))
+    
+    # ipr
+    node.parm("RS_iprOverrideCameraRes").set(1)
+    node.parm("RS_iprOverrideResScale").set(7)
+    
+    node.parmTuple("RS_iprOverrideRes").set((1024, 1024))
+    
+    
+    
+    # set gamma
+    node.parm("RS_gammaFileMode").set(0)
+    
+    
+    # set post scripts
+    
+    node.parm("tpostrender").set(1)
+    node.parm("postrender").set("")
+    
+    ]]></script>
+  </tool>
+
+  <tool name="copy_abs_path" label="Copy Abs. Path" icon="SOP_font">
+    <script scriptType="python"><![CDATA[node = hou.selectedNodes()[-1]
+path = node.path()
+
+hou.ui.copyTextToClipboard(path)]]></script>
+  </tool>
+
+  <tool name="store_node_selection" label="Add to Node Selection" icon="SOP_python">
+    <script scriptType="python"><![CDATA[
+clip = hou.ui.getTextFromClipboard()
+
+if clip.startswith("/obj/"):
+    end_path = clip
+else:
+    end_path = ""
+
+    
+curr_nodes = hou.selectedNodes()
+
+for curr_node in curr_nodes:
+    
+    curr_path = curr_node.path()
+    end_path += curr_path + " "
+
+
+hou.ui.copyTextToClipboard(end_path)
+
+print end_path
+]]></script>
+  </tool>
+
+  <tool name="clear_node_selection" label="Clear Node Selection" icon="SOP_python">
+    <script scriptType="python"><![CDATA[hou.ui.copyTextToClipboard("")]]></script>
+  </tool>
+
+  <tool name="select_node_selection" label="Select Node Selection" icon="SOP_python">
+    <script scriptType="python"><![CDATA[
+clip = hou.ui.getTextFromClipboard()
+
+try:
+
+    path_list = clip[0:-1].split(" ")
+    
+    for node_path in path_list:
+        node = hou.node(node_path)
+        node.setSelected(1)
+    
+except e:
+    print e]]></script>
+  </tool>
+
+  <tool name="kill_vca_jobs" label="Kill VCA jobs" icon="SHELF_factory">
+    <script scriptType="python"><![CDATA[import strands_hou
+
+strands_hou.VCAUtils.killAllVCAJobs()]]></script>
+  </tool>
+
+  <tool name="list_vca_jobs" label="List VCA jobs" icon="SHELF_factory">
+    <script scriptType="python"><![CDATA[import strands_hou
+
+strands_hou.VCAUtils.listAllVCAJobs()]]></script>
+  </tool>
+
+  <tool name="find_rs_textures" label="Find RS Textures" icon="VOP_texture">
+    <script scriptType="python"><![CDATA[
+rs_tex_nodes = []
+rs_tex_node_count = 0
+
+
+for node in hou.node("/").allSubChildren():
+    if node.type().name() == "redshift::TextureSampler" or node.type().name() == "redshift::NormalMap":
+    
+        #print node.name()
+        
+        tex_parm = node.parm("tex0").eval()
+        rs_tex_nodes.append(tex_parm)
+        
+        
+        rs_tex_node_count += 1
+        
+
+
+print str(rs_tex_node_count) + " RS Texture nodes found"
+
+#print rs_tex_nodes]]></script>
+  </tool>
+
+  <tool name="copy_hip_to_clipboard" label="Copy HIP to Clipboard" icon="SOP_font">
+    <script scriptType="python"><![CDATA[path = hou.expandString("$HIP")
+path.replace("S/:", "")
+scene = hou.expandString("$HIPNAME")
+
+hou.ui.copyTextToClipboard(path+"/"+scene+".hip")]]></script>
+  </tool>
+
+  <tool name="open_hip_folder" label="Open Hip Folder" icon="SOP_file">
+    <script scriptType="python"><![CDATA[import strands_hou
+strands_hou.SceneUtils.openHipFolder()]]></script>
+  </tool>
+
+  <toolshelf name="som_tools" label="SOM Tools">
+    <memberTool name="save_inc"/>
+    <memberTool name="open_hip_folder"/>
+    <memberTool name="copy_hip_to_clipboard"/>
+    <memberTool name="copy_abs_path"/>
+    <memberTool name="clear_node_selection"/>
+    <memberTool name="store_node_selection"/>
+    <memberTool name="select_node_selection"/>
+    <memberTool name="extract_object"/>
+  </toolshelf>
+
+  <toolshelf name="som_render" label="SOM Render">
+    <memberTool name="generate_bat"/>
+    <memberTool name="submit_vca"/>
+    <memberTool name="list_vca_jobs"/>
+    <memberTool name="kill_vca_jobs"/>
+  </toolshelf>
+
+  <tool name="convert_all_textures" label="Convert All Textures" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import strands_hou
+strands_hou.SceneUtils.convertAllTextures(kwargs)]]></script>
+  </tool>
+
+  <tool name="check_all_paths" label="Check All Paths" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import strands_hou
+strands_hou.SceneUtils.checkAllPaths(kwargs)]]></script>
+  </tool>
+</shelfDocument>

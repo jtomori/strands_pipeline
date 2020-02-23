@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<menuDocument>
+    <menu>
+        <subMenu id="open_in">
+            <label>Open in...</label>
+            <insertBefore />
+            <context>
+		        <expression>len(kwargs["parms"]) > 0 and kwargs["parms"][0].parmTemplate().type().name() == "String"</expression>
+	        </context>
+            <scriptItem id="reveal_in_file_browser">
+                <label>File browser</label>
+                <scriptCode>
+<![CDATA[
+import os
+import sys
+import subprocess
+
+path = kwargs["parms"][0].eval()
+old_path = path
+if path != "":
+    path = hou.expandString(path)
+    path = os.path.normpath(path)
+    path = os.path.dirname(path)
+
+    if os.path.exists(path):
+        if sys.platform == "linux2":
+            new_env = os.environ
+            new_env["LD_LIBRARY_PATH"] = ""
+            subprocess.Popen(["xdg-open", path], env=new_env)
+        if sys.platform == "win32":
+            subprocess.Popen(["explorer", path])
+        if sys.platform == "darwin":
+            subprocess.Popen(["open", path])
+    else:
+        print('Folder "{}" does not exist or you do not have permission to access it'.format(old_path))
+]]>
+                </scriptCode>
+            </scriptItem>
+            <scriptItem id="reveal_in_mplay">
+                <label>Mplay</label>
+                <scriptCode>
+<![CDATA[
+import os
+import sys
+import subprocess
+
+in_path = hou.pwd().path()
+hou.cd(kwargs["parms"][0].node().path())
+
+path = kwargs["parms"][0].unexpandedString()
+if path != "":
+    path = path.replace("$F", "\$F")
+    path = path.replace("$T", "\$T")
+    path = path.replace("$SF", "\$SF")
+    path = os.path.normpath( hou.expandString(path) )
+
+    subprocess.Popen(["mplay", path])
+
+hou.cd(in_path)
+]]>
+                </scriptCode>
+            </scriptItem>
+            <scriptItem id="reveal_in_gplay">
+                <label>Gplay</label>
+                <scriptCode>
+<![CDATA[
+import os
+import sys
+import subprocess
+
+path = kwargs["parms"][0].eval()
+if path != "":
+    path = os.path.normpath(path)
+
+    subprocess.Popen(["gplay", path])
+ ]]>
+                </scriptCode>
+            </scriptItem>
+            <scriptItem id="reveal_in_rv">
+                <label>RV</label>
+                <scriptCode>
+<![CDATA[
+import os
+import sys
+import subprocess
+
+path = kwargs["parms"][0].eval()
+if path != "":
+    path = os.path.normpath(path)
+
+    subprocess.Popen(["rv", path])
+ ]]>
+                </scriptCode>
+            </scriptItem>
+            <scriptItem id="reveal_in_djv_view">
+                <label>Djv view</label>
+                <scriptCode>
+<![CDATA[
+import os
+import sys
+import subprocess
+
+path = kwargs["parms"][0].eval()
+if path != "":
+    path = os.path.normpath(path)
+
+    subprocess.Popen(["djv_view", path])
+ ]]>
+                </scriptCode>
+            </scriptItem>
+            <scriptItem id="reveal_in_photoshop">
+                <label>Photoshop</label>
+                <scriptCode>
+<![CDATA[
+import os
+import sys
+import subprocess
+
+path = kwargs["parms"][0].eval()
+if path != "":
+    path = os.path.normpath(path)
+
+    subprocess.Popen(["Photoshop", path])
+ ]]>
+                </scriptCode>
+            </scriptItem>
+        </subMenu>
+    </menu>
+</menuDocument>
